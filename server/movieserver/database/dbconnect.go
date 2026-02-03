@@ -37,17 +37,30 @@ func DbConnect() *mongo.Client{
 var client *mongo.Client = DbConnect()
 
 
-func OpenCollection(collectionname string) *mongo.Collection{
-	err := godotenv.Load(".env");if err!=nil{
-		log.Println("Warning : Unable to find the .env file")
-	}
+// func OpenCollection(collectionname string) *mongo.Collection{
+// 	err := godotenv.Load(".env");if err!=nil{
+// 		log.Println("Warning : Unable to find the .env file")
+// 	}
 
 
+// 	databasename := os.Getenv("DATABASE_NAME")
+
+// 	fmt.Println("DATABASE_NAME : ",databasename)
+
+// 	collection:= client.Database(databasename).Collection(collectionname)
+
+// 	return collection
+// }
+
+
+
+func OpenCollection(collectionname string) *mongo.Collection {
 	databasename := os.Getenv("DATABASE_NAME")
 
-	fmt.Println("DATABASE_NAME : ",databasename)
+	fmt.Println("USING DATABASE:", databasename)
+	fmt.Println("USING COLLECTION:", collectionname)
 
-	collection:= client.Database(databasename).Collection(collectionname)
+	collection := client.Database(databasename).Collection(collectionname)
 
 	return collection
 }
