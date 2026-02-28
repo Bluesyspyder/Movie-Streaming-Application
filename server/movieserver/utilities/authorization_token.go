@@ -28,9 +28,6 @@ type SignedDetails struct {
 	jwt.RegisteredClaims
 }
 
-var userCollection *mongo.Collection =
-	database.OpenCollection("users")
-
 /* =====================================================
    ENV HELPERS (IMPORTANT FIX)
 ===================================================== */
@@ -109,10 +106,10 @@ func GenerateToken(
    UPDATE TOKENS
 ===================================================== */
 
-func UpdateTokens(UserId, token, refresh_token string) error {
+func UpdateTokens(UserId, token, refresh_token string, client *mongo.Client, c *gin.Context) error {
 
 	ctx, cancel :=
-		context.WithTimeout(context.Background(), 100*time.Second)
+		context.WithTimeout(c, 100*time.Second)
 	defer cancel()
 
 	updateAt, _ :=
@@ -127,7 +124,8 @@ func UpdateTokens(UserId, token, refresh_token string) error {
 		},
 	}
 
-	x, err := userCollection.UpdateOne(
+	var usercollection *mongo.Collection = database.OpenCollection("users", client)
+	x, err := usercollection.UpdateOne(
 		ctx,
 		bson.M{"user_id": UserId},
 		updateData,
@@ -209,19 +207,34 @@ func ValidateTokens(tokenString string) (*SignedDetails, error) {
 	return claims, nil
 }
 
-
-func GetuserID(c *gin.Context)(string,error){
+func GetuserID(c *gin.Context) (string, error) {
 	UserId, exists := c.Get("userId")
 
-	if !exists{
-		return "",errors.New("User ID does not exist in this context")
+	if !exists {
+		return "", errors.New("User ID does not exist in this context")
 	}
 
 	id, ok := UserId.(string)
 
-	if !ok{
-		return "",errors.New("User ID does not exist in this context")
+	if !ok {
+		return "", errors.New("User ID does not exist in this context")
 	}
 
 	return id, nil
+}
+
+func GetuserRole(c *gin.Context) (string, error) {
+	Role, exists := c.Get("role")
+
+	if !exists {
+		return "", errors.New("User ID does not exist in this context")
+	}
+
+	memberRole, ok := Role.(string)
+
+	if !ok {
+		return "", errors.New("User ID does not exist in this context")
+	}
+
+	return memberRole, nil
 }
